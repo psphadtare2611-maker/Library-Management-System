@@ -7,9 +7,10 @@
 # --- Database connectivity ---
 pyodbc>=5.0.0          # Connects Python to SQL Server via ODBC
 
-# --- Reporting / exports (used by services/report_service + reports/) ---
-# openpyxl>=3.1.0      # Export reports to Excel (.xlsx)  -- uncomment when needed
-# reportlab>=4.0.0     # Export reports to PDF            -- uncomment when needed
+# --- Reporting / exports (used by reports/report_generator + report_view) ---
+pandas>=2.0.0          # Builds report tables and writes them to Excel
+openpyxl>=3.1.0        # Excel (.xlsx) engine used by pandas.to_excel
+# reportlab>=4.0.0     # Export reports to PDF -- uncomment if PDF export added
 
 # --- Notes ---
 # Tkinter is NOT listed here: it ships with the standard Python installation.
