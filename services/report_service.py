@@ -15,6 +15,7 @@
 # ============================================================================
 
 from database.connection import Database
+from utils.logger import logger
 
 
 class ReportService:
@@ -61,7 +62,8 @@ class ReportService:
             }
             return self._response(True, "Dashboard stats loaded.", stats)
         except Exception as error:
-            return self._response(False, f"Could not load dashboard stats: {error}")
+            logger.error(f"get_dashboard_stats failed: {error}")
+            return self._response(False, "Could not load the dashboard statistics.")
 
     # ------------------------------------------------------------------ #
     # Generic report runner
@@ -83,7 +85,8 @@ class ReportService:
             data = {"columns": columns, "rows": rows}
             return self._response(True, f"{label}: {len(rows)} row(s).", data)
         except Exception as error:
-            return self._response(False, f"Could not build report '{label}': {error}")
+            logger.error(f"report '{label}' failed: {error}")
+            return self._response(False, f"Could not build the '{label}' report.")
 
     # ------------------------------------------------------------------ #
     # Individual reports

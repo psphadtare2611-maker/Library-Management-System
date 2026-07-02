@@ -77,7 +77,8 @@ class BookService:
             logger.info(f"Book added: '{book.title}' (id={new_id})")
             return self._response(True, f"Book '{book.title}' added successfully.", new_id)
         except Exception as error:
-            return self._response(False, f"Could not add book: {error}")
+            logger.error(f"add_book failed for '{getattr(book, 'title', '?')}': {error}")
+            return self._response(False, "Could not add the book. Please try again.")
 
     # ------------------------------------------------------------------ #
     # UPDATE
@@ -113,9 +114,11 @@ class BookService:
 
             if rows == 0:
                 return self._response(False, f"No book found with id {book.book_id}.")
+            logger.info(f"Book updated: '{book.title}' (id={book.book_id})")
             return self._response(True, f"Book '{book.title}' updated successfully.")
         except Exception as error:
-            return self._response(False, f"Could not update book: {error}")
+            logger.error(f"update_book failed (id={book.book_id}): {error}")
+            return self._response(False, "Could not update the book. Please try again.")
 
     # ------------------------------------------------------------------ #
     # DELETE (soft delete)
@@ -137,22 +140,23 @@ class BookService:
                     return self._response(False, f"No book found with id {book_id}.")
 
                 title, status = row[0], row[1]
-                if status == "Issued":
+                if status == Book.ISSUED:
                     return self._response(
                         False,
                         f"'{title}' is currently issued and cannot be removed. "
                         f"Return it first.",
                     )
-                if status == "Removed":
+                if status == Book.REMOVED:
                     return self._response(False, f"'{title}' is already removed.")
 
                 db.execute_non_query(
-                    "UPDATE Books SET Status = 'Removed' WHERE BookID = ?", (book_id,)
+                    "UPDATE Books SET Status = ? WHERE BookID = ?", (Book.REMOVED, book_id)
                 )
             logger.info(f"Book deleted: '{title}' (id={book_id})")
             return self._response(True, f"Book '{title}' removed successfully.")
         except Exception as error:
-            return self._response(False, f"Could not remove book: {error}")
+            logger.error(f"delete_book failed (id={book_id}): {error}")
+            return self._response(False, "Could not remove the book. Please try again.")
 
     # ------------------------------------------------------------------ #
     # READ — single book
@@ -168,7 +172,8 @@ class BookService:
                 return self._response(False, f"No book found with id {book_id}.")
             return self._response(True, "Book found.", self._row_to_book(row))
         except Exception as error:
-            return self._response(False, f"Could not fetch book: {error}")
+            logger.error(f"get_book failed (id={book_id}): {error}")
+            return self._response(False, "Could not load the book.")
 
     # ------------------------------------------------------------------ #
     # READ — search
@@ -180,7 +185,7 @@ class BookService:
         (empty list if nothing matches).
         """
         try:
-            like = f"%{keyword.strip()}%"
+            like = f"%{(keyword or '').strip()}%"
             query = (
                 f"SELECT {self._COLUMNS} FROM Books "
                 "WHERE Status <> 'Removed' "
@@ -192,7 +197,8 @@ class BookService:
             books = [self._row_to_book(r) for r in rows]
             return self._response(True, f"{len(books)} book(s) found.", books)
         except Exception as error:
-            return self._response(False, f"Search failed: {error}")
+            logger.error(f"search_book failed (keyword={keyword!r}): {error}")
+            return self._response(False, "Search failed. Please try again.")
 
     # ------------------------------------------------------------------ #
     # READ — all books
@@ -213,4 +219,5 @@ class BookService:
             books = [self._row_to_book(r) for r in rows]
             return self._response(True, f"{len(books)} book(s) in the library.", books)
         except Exception as error:
-            return self._response(False, f"Could not fetch books: {error}")
+            logger.error(f"get_all_books failed: {error}")
+            return self._response(False, "Could not load the books.")

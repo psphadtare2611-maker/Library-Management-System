@@ -22,9 +22,20 @@ from datetime import date, datetime
 class Book:
     """A single book in the home library."""
 
-    # The states a book may be in. Kept in sync with the CHECK constraint
-    # in database/schema.sql.
-    VALID_STATUSES = ("Available", "Issued", "Lost", "Removed")
+    # The states a book may be in. Named constants avoid magic strings and are
+    # kept in sync with the CHECK constraint in database/schema.sql.
+    AVAILABLE = "Available"
+    ISSUED = "Issued"
+    LOST = "Lost"
+    REMOVED = "Removed"
+    VALID_STATUSES = (AVAILABLE, ISSUED, LOST, REMOVED)
+
+    # Maximum field lengths, mirroring the NVARCHAR sizes in schema.sql, so we
+    # give a friendly message instead of a truncation error from the database.
+    MAX_TITLE = 200
+    MAX_AUTHOR = 150
+    MAX_CATEGORY = 50
+    MAX_REMARKS = 500
 
     def __init__(
         self,
@@ -70,6 +81,12 @@ class Book:
         if not self.title or not str(self.title).strip():
             raise ValueError("Book title is required and cannot be empty.")
 
+        # Field lengths must fit the database columns.
+        self._check_length("Title", self.title, self.MAX_TITLE)
+        self._check_length("Author", self.author, self.MAX_AUTHOR)
+        self._check_length("Category", self.category, self.MAX_CATEGORY)
+        self._check_length("Remarks", self.remarks, self.MAX_REMARKS)
+
         # Status must be one of the known states.
         if self.status not in self.VALID_STATUSES:
             raise ValueError(
@@ -85,6 +102,12 @@ class Book:
                 raise ValueError("PurchaseDate cannot be in the future.")
 
         return True
+
+    @staticmethod
+    def _check_length(field, value, maximum):
+        """Raise ValueError if a text field is longer than the DB column."""
+        if value is not None and len(value) > maximum:
+            raise ValueError(f"{field} is too long (max {maximum} characters).")
 
     @staticmethod
     def _coerce_date(value):
@@ -106,7 +129,7 @@ class Book:
     # ------------------------------------------------------------------ #
     def is_available(self):
         """True if this book is free to be issued."""
-        return self.status == "Available"
+        return self.status == self.AVAILABLE
 
     def to_dict(self):
         """Return the book's data as a plain dict (handy for the UI/tables)."""

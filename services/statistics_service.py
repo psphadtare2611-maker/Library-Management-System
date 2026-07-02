@@ -19,6 +19,7 @@
 # ============================================================================
 
 from database.connection import Database
+from utils.logger import logger
 
 
 class StatisticsService:
@@ -94,4 +95,5 @@ class StatisticsService:
             }
             return self._response(True, "Statistics calculated.", data)
         except Exception as error:
-            return self._response(False, f"Could not calculate statistics: {error}")
+            logger.error(f"get_statistics failed: {error}")
+            return self._response(False, "Could not calculate the statistics.")

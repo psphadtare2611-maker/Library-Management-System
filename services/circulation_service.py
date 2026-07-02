@@ -124,7 +124,8 @@ class CirculationService:
         except Exception as error:
             # The connection closes on exit without a commit, so pyodbc rolls
             # back the uncommitted insert/update automatically.
-            return self._response(False, f"Could not issue book: {error}")
+            logger.error(f"issue_book failed (book={book_id}, borrower={borrower_id}): {error}")
+            return self._response(False, "Could not issue the book. Please try again.")
 
     # ------------------------------------------------------------------ #
     # ACTIVE LOANS (books currently out) — used by the Return screen
@@ -173,7 +174,8 @@ class CirculationService:
                 })
             return self._response(True, f"{len(loans)} book(s) currently out.", loans)
         except Exception as error:
-            return self._response(False, f"Could not load active loans: {error}")
+            logger.error(f"get_active_loans failed (keyword={keyword!r}): {error}")
+            return self._response(False, "Could not load the active loans.")
 
     # ------------------------------------------------------------------ #
     # RETURN
@@ -236,4 +238,5 @@ class CirculationService:
             )
             return self._response(True, message, transaction_id)
         except Exception as error:
-            return self._response(False, f"Could not return book: {error}")
+            logger.error(f"return_book failed (tx={transaction_id}): {error}")
+            return self._response(False, "Could not return the book. Please try again.")

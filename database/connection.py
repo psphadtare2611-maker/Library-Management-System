@@ -76,8 +76,17 @@ class Database:
         """
         Close the cursor and connection safely. Never raises — closing an
         already-closed or never-opened connection is a no-op.
+
+        Any uncommitted work is rolled back first, so a connection can never
+        leak a half-finished transaction (belt-and-braces alongside the
+        explicit commits/rollbacks in the write methods).
         """
         try:
+            if self.connection is not None:
+                try:
+                    self.connection.rollback()   # discard anything uncommitted
+                except pyodbc.Error:
+                    pass
             if self.cursor is not None:
                 self.cursor.close()
             if self.connection is not None:
@@ -88,6 +97,14 @@ class Database:
         finally:
             self.cursor = None
             self.connection = None
+
+    def _ensure_connected(self):
+        """
+        Guard used by every query method: fail clearly if the connection is
+        not open, instead of crashing with an AttributeError on a None cursor.
+        """
+        if self.cursor is None or self.connection is None:
+            raise RuntimeError("Database is not connected. Call connect() first.")
 
     # ------------------------------------------------------------------ #
     # Context-manager support:  `with Database() as db:`
@@ -113,6 +130,7 @@ class Database:
         params : values to bind to the placeholders (prevents SQL injection).
         returns: a list of pyodbc.Row objects (empty list if no matches).
         """
+        self._ensure_connected()
         try:
             self.cursor.execute(query, params)
             return self.cursor.fetchall()
@@ -125,6 +143,7 @@ class Database:
         Run a SELECT statement and return only the FIRST row (or None).
         Handy for lookups by id or COUNT(*) style queries.
         """
+        self._ensure_connected()
         try:
             self.cursor.execute(query, params)
             return self.cursor.fetchone()
@@ -143,6 +162,7 @@ class Database:
         On error, the transaction is rolled back so the database is not left
         in a half-changed state.
         """
+        self._ensure_connected()
         try:
             self.cursor.execute(query, params)
             self.connection.commit()
@@ -162,6 +182,7 @@ class Database:
         Note: appends 'SELECT SCOPE_IDENTITY()' to read back the new id in the
         same batch, so it reflects THIS insert only.
         """
+        self._ensure_connected()
         try:
             self.cursor.execute(query + "; SELECT SCOPE_IDENTITY();", params)
             # Move to the result set that holds the new identity value.

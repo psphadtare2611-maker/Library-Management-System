@@ -19,6 +19,7 @@
 # ============================================================================
 
 from database.connection import Database
+from utils.logger import logger
 
 
 class SearchService:
@@ -84,4 +85,5 @@ class SearchService:
 
             return self._response(True, f"{len(results)} result(s) for '{kw}'.", results)
         except Exception as error:
-            return self._response(False, f"Search failed: {error}")
+            logger.error(f"universal_search failed (keyword={kw!r}): {error}")
+            return self._response(False, "Search failed. Please try again.")

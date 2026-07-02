@@ -23,6 +23,12 @@ class Borrower:
     # Basic email shape: something@something.something
     _EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
+    # Maximum field lengths, mirroring the NVARCHAR sizes in schema.sql.
+    MAX_NAME = 100
+    MAX_PHONE = 20
+    MAX_EMAIL = 100
+    MAX_ADDRESS = 250
+
     def __init__(
         self,
         name,
@@ -61,6 +67,12 @@ class Borrower:
         if not self.name or not str(self.name).strip():
             raise ValueError("Borrower name is required and cannot be empty.")
 
+        # Field lengths must fit the database columns.
+        self._check_length("Name", self.name, self.MAX_NAME)
+        self._check_length("Phone", self.phone, self.MAX_PHONE)
+        self._check_length("Email", self.email, self.MAX_EMAIL)
+        self._check_length("Address", self.address, self.MAX_ADDRESS)
+
         # Phone (optional): if given, must contain 7–15 digits and only
         # sensible characters (digits, spaces, +, -, parentheses).
         if self.phone:
@@ -75,6 +87,12 @@ class Borrower:
             raise ValueError("Email is not a valid address (expected name@domain.com).")
 
         return True
+
+    @staticmethod
+    def _check_length(field, value, maximum):
+        """Raise ValueError if a text field is longer than the DB column."""
+        if value is not None and len(value) > maximum:
+            raise ValueError(f"{field} is too long (max {maximum} characters).")
 
     # ------------------------------------------------------------------ #
     # Convenience helpers

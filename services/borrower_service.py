@@ -15,6 +15,7 @@
 
 from database.connection import Database
 from models.borrower import Borrower
+from utils.logger import logger
 
 
 class BorrowerService:
@@ -60,9 +61,11 @@ class BorrowerService:
             params = (borrower.name, borrower.phone, borrower.email, borrower.address)
             with Database() as db:
                 new_id = db.execute_insert(query, params)
+            logger.info(f"Borrower added: '{borrower.name}' (id={new_id})")
             return self._response(True, f"Borrower '{borrower.name}' added successfully.", new_id)
         except Exception as error:
-            return self._response(False, f"Could not add borrower: {error}")
+            logger.error(f"add_borrower failed for '{getattr(borrower, 'name', '?')}': {error}")
+            return self._response(False, "Could not add the borrower. Please try again.")
 
     # ------------------------------------------------------------------ #
     # UPDATE
@@ -93,9 +96,11 @@ class BorrowerService:
 
             if rows == 0:
                 return self._response(False, f"No active borrower found with id {borrower.borrower_id}.")
+            logger.info(f"Borrower updated: '{borrower.name}' (id={borrower.borrower_id})")
             return self._response(True, f"Borrower '{borrower.name}' updated successfully.")
         except Exception as error:
-            return self._response(False, f"Could not update borrower: {error}")
+            logger.error(f"update_borrower failed (id={borrower.borrower_id}): {error}")
+            return self._response(False, "Could not update the borrower. Please try again.")
 
     # ------------------------------------------------------------------ #
     # DELETE (soft delete)
@@ -139,9 +144,11 @@ class BorrowerService:
                     "UPDATE Borrowers SET IsActive = 0 WHERE BorrowerID = ?",
                     (borrower_id,),
                 )
+            logger.info(f"Borrower deleted: '{name}' (id={borrower_id})")
             return self._response(True, f"Borrower '{name}' removed successfully.")
         except Exception as error:
-            return self._response(False, f"Could not remove borrower: {error}")
+            logger.error(f"delete_borrower failed (id={borrower_id}): {error}")
+            return self._response(False, "Could not remove the borrower. Please try again.")
 
     # ------------------------------------------------------------------ #
     # READ — single borrower (bonus helper, used by edit flows)
@@ -159,7 +166,8 @@ class BorrowerService:
                 return self._response(False, f"No active borrower found with id {borrower_id}.")
             return self._response(True, "Borrower found.", self._row_to_borrower(row))
         except Exception as error:
-            return self._response(False, f"Could not fetch borrower: {error}")
+            logger.error(f"get_borrower failed (id={borrower_id}): {error}")
+            return self._response(False, "Could not load the borrower.")
 
     # ------------------------------------------------------------------ #
     # READ — search
@@ -170,7 +178,7 @@ class BorrowerService:
         LIKE). Returns a list of Borrowers in `data` (empty if none match).
         """
         try:
-            like = f"%{keyword.strip()}%"
+            like = f"%{(keyword or '').strip()}%"
             query = (
                 f"SELECT {self._COLUMNS} FROM Borrowers "
                 "WHERE IsActive = 1 "
@@ -182,7 +190,8 @@ class BorrowerService:
             borrowers = [self._row_to_borrower(r) for r in rows]
             return self._response(True, f"{len(borrowers)} borrower(s) found.", borrowers)
         except Exception as error:
-            return self._response(False, f"Search failed: {error}")
+            logger.error(f"search_borrower failed (keyword={keyword!r}): {error}")
+            return self._response(False, "Search failed. Please try again.")
 
     # ------------------------------------------------------------------ #
     # READ — all borrowers
@@ -203,4 +212,5 @@ class BorrowerService:
             borrowers = [self._row_to_borrower(r) for r in rows]
             return self._response(True, f"{len(borrowers)} borrower(s) registered.", borrowers)
         except Exception as error:
-            return self._response(False, f"Could not fetch borrowers: {error}")
+            logger.error(f"get_all_borrowers failed: {error}")
+            return self._response(False, "Could not load the borrowers.")
