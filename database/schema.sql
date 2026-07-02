@@ -50,11 +50,14 @@ GO
 -- ----------------------------------------------------------------------------
 CREATE TABLE dbo.Books
 (
+    -- BookID is a HIDDEN internal primary key: auto-generated, never entered
+    -- by the user and never shown in the UI. It exists so the Transactions
+    -- table can reliably reference a specific book (titles are not unique).
     BookID        INT            IDENTITY(1,1) NOT NULL,   -- auto-incrementing PK
     Title         NVARCHAR(200)  NOT NULL,                 -- required
     Author        NVARCHAR(150)  NULL,
     Category      NVARCHAR(50)   NULL,
-    ISBN          NVARCHAR(20)   NULL,
+    -- (ISBN intentionally omitted — not needed for a domestic library.)
     PurchaseDate  DATE           NULL,
     Status        NVARCHAR(20)   NOT NULL
                                  CONSTRAINT DF_Books_Status DEFAULT ('Available'),
@@ -67,14 +70,6 @@ CREATE TABLE dbo.Books
     CONSTRAINT CK_Books_Status
         CHECK (Status IN ('Available', 'Issued', 'Lost', 'Removed'))
 );
-GO
-
--- Enforce ISBN uniqueness ONLY for rows that actually have an ISBN.
--- (A plain UNIQUE constraint would allow just one NULL; this filtered index
---  permits many books without an ISBN while still blocking duplicate ISBNs.)
-CREATE UNIQUE INDEX UX_Books_ISBN
-    ON dbo.Books (ISBN)
-    WHERE ISBN IS NOT NULL;
 GO
 
 
