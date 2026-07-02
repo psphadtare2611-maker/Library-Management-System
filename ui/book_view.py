@@ -22,15 +22,18 @@ from tkinter import ttk, messagebox
 
 from models.book import Book
 from services.book_service import BookService
+from ui import theme
 
 
 class BookListView(ttk.Frame):
     """A framed, sortable list of all books with edit/delete actions."""
 
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
-    ROW_ODD = "#ffffff"
-    ROW_EVEN = "#f4f6f7"
+    # Shared palette (see ui/theme.py) — kept as class attributes so the rest
+    # of the screen can reference self.HEADER_BG etc. as before.
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
+    ROW_ODD = theme.ROW_ODD
+    ROW_EVEN = theme.ROW_EVEN
 
     # (column id, heading text, width, stretch?)
     COLUMNS = (
@@ -126,22 +129,8 @@ class BookListView(ttk.Frame):
         self.lbl_status.grid(row=3, column=0, sticky="w")
 
     def _apply_style(self):
-        """Professional Treeview styling (row height, fonts, header look)."""
-        style = ttk.Style()
-        try:
-            style.theme_use("clam")   # 'clam' gives clean, controllable styling
-        except tk.TclError:
-            pass
-        style.configure(
-            "Treeview", rowheight=26, font=("Segoe UI", 10),
-            background="#ffffff", fieldbackground="#ffffff",
-        )
-        style.configure(
-            "Treeview.Heading", font=("Segoe UI", 10, "bold"),
-            background=self.HEADER_BG, foreground="#ffffff", padding=6,
-        )
-        style.map("Treeview", background=[("selected", "#2980b9")],
-                  foreground=[("selected", "#ffffff")])
+        """Apply the shared professional Treeview styling (see ui/theme.py)."""
+        theme.apply_treeview_style()
 
     # ------------------------------------------------------------------ #
     # Data loading

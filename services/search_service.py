@@ -19,15 +19,12 @@
 # ============================================================================
 
 from database.connection import Database
+from services.service_base import ServiceBase
 from utils.logger import logger
 
 
-class SearchService:
+class SearchService(ServiceBase):
     """Cross-table keyword search over books and borrowers."""
-
-    @staticmethod
-    def _response(success, message, data=None):
-        return {"success": success, "message": message, "data": data}
 
     def universal_search(self, keyword):
         """

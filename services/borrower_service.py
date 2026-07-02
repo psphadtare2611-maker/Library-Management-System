@@ -15,10 +15,11 @@
 
 from database.connection import Database
 from models.borrower import Borrower
+from services.service_base import ServiceBase
 from utils.logger import logger
 
 
-class BorrowerService:
+class BorrowerService(ServiceBase):
     """Business logic for adding, editing, removing and finding borrowers."""
 
     # SELECT column list, in one place. Order must match _row_to_borrower().
@@ -27,11 +28,6 @@ class BorrowerService:
     # ------------------------------------------------------------------ #
     # Helpers
     # ------------------------------------------------------------------ #
-    @staticmethod
-    def _response(success, message, data=None):
-        """Build the standard response dict returned by every method."""
-        return {"success": success, "message": message, "data": data}
-
     @staticmethod
     def _row_to_borrower(row):
         """Convert a pyodbc row (in _COLUMNS order) into a Borrower object."""

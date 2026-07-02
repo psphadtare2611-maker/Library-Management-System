@@ -24,15 +24,12 @@ from datetime import date
 
 from database.connection import Database
 from models.transaction import Transaction
+from services.service_base import ServiceBase
 from utils.logger import logger
 
 
-class CirculationService:
-    """Business logic for issuing books (and returning them, later)."""
-
-    @staticmethod
-    def _response(success, message, data=None):
-        return {"success": success, "message": message, "data": data}
+class CirculationService(ServiceBase):
+    """Business logic for issuing books and returning them."""
 
     # ------------------------------------------------------------------ #
     # ISSUE

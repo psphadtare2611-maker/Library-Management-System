@@ -26,13 +26,15 @@ from config.settings import LOAN_PERIOD_DAYS
 from services.book_service import BookService
 from services.borrower_service import BorrowerService
 from services.circulation_service import CirculationService
+from ui import theme
 
 
 class IssueBookView(ttk.Frame):
     """A framed 'Issue Book' form."""
 
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
+    # Shared palette (see ui/theme.py).
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
 
     def __init__(self, parent, book_service=None, borrower_service=None, circulation_service=None):
         super().__init__(parent, padding=0)
@@ -207,10 +209,11 @@ class ReturnBookView(ttk.Frame):
     with a Return action.
     """
 
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
-    ROW_ODD = "#ffffff"
-    ROW_EVEN = "#f4f6f7"
+    # Shared palette (see ui/theme.py).
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
+    ROW_ODD = theme.ROW_ODD
+    ROW_EVEN = theme.ROW_EVEN
 
     COLUMNS = (
         ("book", "Book", 230, True),

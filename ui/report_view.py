@@ -23,15 +23,17 @@ from tkinter import ttk, messagebox
 
 from services.report_service import ReportService
 from reports.report_generator import export_to_excel
+from ui import theme
 
 
 class ReportView(ttk.Frame):
     """Report chooser + Treeview display + Excel export."""
 
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
-    ROW_ODD = "#ffffff"
-    ROW_EVEN = "#f4f6f7"
+    # Shared palette (see ui/theme.py).
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
+    ROW_ODD = theme.ROW_ODD
+    ROW_EVEN = theme.ROW_EVEN
 
     def __init__(self, parent, report_service=None):
         super().__init__(parent, padding=0)
@@ -96,17 +98,8 @@ class ReportView(ttk.Frame):
         self.lbl_status.grid(row=3, column=0, sticky="w")
 
     def _apply_style(self):
-        style = ttk.Style()
-        try:
-            style.theme_use("clam")
-        except tk.TclError:
-            pass
-        style.configure("Treeview", rowheight=26, font=("Segoe UI", 10),
-                        background="#ffffff", fieldbackground="#ffffff")
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"),
-                        background=self.HEADER_BG, foreground="#ffffff", padding=6)
-        style.map("Treeview", background=[("selected", "#2980b9")],
-                  foreground=[("selected", "#ffffff")])
+        """Apply the shared professional Treeview styling (see ui/theme.py)."""
+        theme.apply_treeview_style()
 
     # ------------------------------------------------------------------ #
     # Generate / display a report

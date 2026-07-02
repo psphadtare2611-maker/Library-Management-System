@@ -20,15 +20,16 @@ from tkinter import ttk, messagebox
 
 from models.book import Book
 from services.book_service import BookService
+from ui import theme
 
 
 class AddBookView(ttk.Frame):
     """A framed 'Add Book' form that can be dropped into the main window."""
 
-    # Simple colour palette for a clean, professional look.
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
-    ACCENT = "#2980b9"
+    # Shared palette (see ui/theme.py).
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
+    ACCENT = theme.ACCENT
 
     def __init__(self, parent, service=None, on_back=None):
         """

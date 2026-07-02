@@ -15,15 +15,17 @@ import tkinter as tk
 from tkinter import ttk
 
 from services.search_service import SearchService
+from ui import theme
 
 
 class UniversalSearchView(ttk.Frame):
     """A single search box with live, cross-table results."""
 
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
-    ROW_ODD = "#ffffff"
-    ROW_EVEN = "#f4f6f7"
+    # Shared palette (see ui/theme.py).
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
+    ROW_ODD = theme.ROW_ODD
+    ROW_EVEN = theme.ROW_EVEN
     DEBOUNCE_MS = 200
 
     COLUMNS = (
@@ -103,17 +105,8 @@ class UniversalSearchView(ttk.Frame):
         self.lbl_status.grid(row=3, column=0, sticky="w")
 
     def _apply_style(self):
-        style = ttk.Style()
-        try:
-            style.theme_use("clam")
-        except tk.TclError:
-            pass
-        style.configure("Treeview", rowheight=26, font=("Segoe UI", 10),
-                        background="#ffffff", fieldbackground="#ffffff")
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"),
-                        background=self.HEADER_BG, foreground="#ffffff", padding=6)
-        style.map("Treeview", background=[("selected", "#2980b9")],
-                  foreground=[("selected", "#ffffff")])
+        """Apply the shared professional Treeview styling (see ui/theme.py)."""
+        theme.apply_treeview_style()
 
     # ------------------------------------------------------------------ #
     # Live search (debounced)

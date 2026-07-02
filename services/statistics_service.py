@@ -19,15 +19,12 @@
 # ============================================================================
 
 from database.connection import Database
+from services.service_base import ServiceBase
 from utils.logger import logger
 
 
-class StatisticsService:
+class StatisticsService(ServiceBase):
     """Aggregate statistics about the library's books and borrowing."""
-
-    @staticmethod
-    def _response(success, message, data=None):
-        return {"success": success, "message": message, "data": data}
 
     def get_statistics(self):
         """

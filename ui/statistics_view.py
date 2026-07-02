@@ -14,14 +14,16 @@ import tkinter as tk
 from tkinter import ttk
 
 from services.statistics_service import StatisticsService
+from ui import theme
 
 
 class StatisticsView(tk.Frame):
     """Analytics screen driven by StatisticsService."""
 
-    BG = "#ecf0f1"
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
+    # Shared palette (see ui/theme.py).
+    BG = theme.BG
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
 
     CARDS = (
         ("total_books", "Total Books", "#3498db"),
@@ -125,15 +127,8 @@ class StatisticsView(tk.Frame):
         return value
 
     def _apply_style(self):
-        style = ttk.Style()
-        try:
-            style.theme_use("clam")
-        except tk.TclError:
-            pass
-        style.configure("Treeview", rowheight=25, font=("Segoe UI", 10),
-                        background="#ffffff", fieldbackground="#ffffff")
-        style.configure("Treeview.Heading", font=("Segoe UI", 10, "bold"),
-                        background=self.HEADER_BG, foreground="#ffffff", padding=6)
+        """Apply the shared professional Treeview styling (see ui/theme.py)."""
+        theme.apply_treeview_style(rowheight=25)
 
     # ------------------------------------------------------------------ #
     # Data

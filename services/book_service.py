@@ -18,10 +18,11 @@
 
 from database.connection import Database
 from models.book import Book
+from services.service_base import ServiceBase
 from utils.logger import logger
 
 
-class BookService:
+class BookService(ServiceBase):
     """Business logic for adding, editing, removing and finding books."""
 
     # -- SELECT column list, kept in ONE place so every read is consistent. --
@@ -31,11 +32,6 @@ class BookService:
     # ------------------------------------------------------------------ #
     # Helpers
     # ------------------------------------------------------------------ #
-    @staticmethod
-    def _response(success, message, data=None):
-        """Build the standard response dict returned by every method."""
-        return {"success": success, "message": message, "data": data}
-
     @staticmethod
     def _row_to_book(row):
         """Convert a pyodbc row (in _COLUMNS order) into a Book object."""

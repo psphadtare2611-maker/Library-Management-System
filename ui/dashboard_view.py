@@ -17,15 +17,16 @@ from tkinter import ttk, messagebox
 from datetime import date
 
 from services.report_service import ReportService
+from ui import theme
 
 
 class DashboardView(tk.Frame):
     """Modern landing screen with stat cards and navigation buttons."""
 
-    # Palette
-    BG = "#ecf0f1"
-    HEADER_BG = "#2c3e50"
-    HEADER_FG = "#ffffff"
+    # Shared palette (see ui/theme.py).
+    BG = theme.BG
+    HEADER_BG = theme.HEADER_BG
+    HEADER_FG = theme.HEADER_FG
 
     # (key, title, accent colour) for each card.
     CARDS = (
