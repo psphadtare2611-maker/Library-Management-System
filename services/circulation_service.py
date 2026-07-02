@@ -20,6 +20,8 @@
 # Returns the standard response dict: {success, message, data}.
 # ============================================================================
 
+from datetime import date
+
 from database.connection import Database
 from models.transaction import Transaction
 
@@ -117,3 +119,111 @@ class CirculationService:
             # The connection closes on exit without a commit, so pyodbc rolls
             # back the uncommitted insert/update automatically.
             return self._response(False, f"Could not issue book: {error}")
+
+    # ------------------------------------------------------------------ #
+    # ACTIVE LOANS (books currently out) — used by the Return screen
+    # ------------------------------------------------------------------ #
+    def get_active_loans(self, keyword=None):
+        """
+        List every book currently out (ReturnDate IS NULL), joined with its
+        book title and borrower name. Optionally filter by a keyword that
+        matches the title or the borrower's name.
+
+        Returns a list of dicts in `data`, each:
+            {transaction_id, book_title, borrower_name,
+             issue_date, expected_return_date, overdue}
+        `overdue` is True if the due date has already passed.
+        """
+        try:
+            query = (
+                "SELECT t.TransactionID, b.Title, br.Name, "
+                "       t.IssueDate, t.ExpectedReturnDate "
+                "FROM Transactions t "
+                "JOIN Books b     ON t.BookID = b.BookID "
+                "JOIN Borrowers br ON t.BorrowerID = br.BorrowerID "
+                "WHERE t.ReturnDate IS NULL "
+            )
+            params = ()
+            if keyword and keyword.strip():
+                like = f"%{keyword.strip()}%"
+                query += "AND (b.Title LIKE ? OR br.Name LIKE ?) "
+                params = (like, like)
+            query += "ORDER BY t.ExpectedReturnDate"
+
+            with Database() as db:
+                rows = db.execute_query(query, params)
+
+            today = date.today()
+            loans = []
+            for r in rows:
+                expected = r[4]
+                loans.append({
+                    "transaction_id": r[0],
+                    "book_title": r[1],
+                    "borrower_name": r[2],
+                    "issue_date": r[3],
+                    "expected_return_date": expected,
+                    "overdue": bool(expected and expected < today),
+                })
+            return self._response(True, f"{len(loans)} book(s) currently out.", loans)
+        except Exception as error:
+            return self._response(False, f"Could not load active loans: {error}")
+
+    # ------------------------------------------------------------------ #
+    # RETURN
+    # ------------------------------------------------------------------ #
+    def return_book(self, transaction_id, return_date=None):
+        """
+        Return a borrowed book. Atomically:
+            - set the transaction's ReturnDate and Status='Returned'
+            - set the book's status back to 'Available'
+
+        return_date defaults to today. Returns a confirmation message that
+        notes if the book came back late.
+        """
+        rdate = return_date or date.today()
+        try:
+            with Database() as db:
+                cursor = db.cursor
+
+                # Look up the transaction along with its book/borrower names.
+                row = cursor.execute(
+                    "SELECT t.BookID, t.IssueDate, t.ExpectedReturnDate, t.ReturnDate, "
+                    "       b.Title, br.Name "
+                    "FROM Transactions t "
+                    "JOIN Books b      ON t.BookID = b.BookID "
+                    "JOIN Borrowers br ON t.BorrowerID = br.BorrowerID "
+                    "WHERE t.TransactionID = ?",
+                    (transaction_id,),
+                ).fetchone()
+                if row is None:
+                    return self._response(False, "That transaction does not exist.")
+
+                book_id, issue_date, expected, existing_return, title, name = row
+
+                # Guard: cannot return something already returned.
+                if existing_return is not None:
+                    return self._response(False, f"'{title}' has already been returned.")
+
+                # Guard: return date cannot be before the issue date.
+                if issue_date and rdate < issue_date:
+                    return self._response(False, "Return date cannot be before the issue date.")
+
+                # Update the transaction and free the book (atomic).
+                cursor.execute(
+                    "UPDATE Transactions SET ReturnDate = ?, Status = 'Returned' "
+                    "WHERE TransactionID = ?",
+                    (rdate, transaction_id),
+                )
+                cursor.execute(
+                    "UPDATE Books SET Status = 'Available' WHERE BookID = ?", (book_id,)
+                )
+                db.connection.commit()
+
+            late_days = (rdate - expected).days if expected and rdate > expected else 0
+            message = f"'{title}' returned by '{name}'."
+            if late_days > 0:
+                message += f" It was {late_days} day(s) overdue."
+            return self._response(True, message, transaction_id)
+        except Exception as error:
+            return self._response(False, f"Could not return book: {error}")
