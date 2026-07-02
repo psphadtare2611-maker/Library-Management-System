@@ -79,11 +79,17 @@ GO
 -- ----------------------------------------------------------------------------
 CREATE TABLE dbo.Borrowers
 (
+    -- BorrowerID is a HIDDEN internal primary key (auto-generated, never shown
+    -- in the UI) so Transactions can reference a specific borrower.
     BorrowerID  INT            IDENTITY(1,1) NOT NULL,     -- auto-incrementing PK
     Name        NVARCHAR(100)  NOT NULL,                   -- required
     Phone       NVARCHAR(20)   NULL,
     Email       NVARCHAR(100)  NULL,
     Address     NVARCHAR(250)  NULL,
+    -- Soft-delete flag: removing a borrower sets this to 0 instead of deleting
+    -- the row, so borrowing history (in Transactions) is never lost.
+    IsActive    BIT            NOT NULL
+                               CONSTRAINT DF_Borrowers_IsActive DEFAULT (1),
 
     -- Primary key ------------------------------------------------------------
     CONSTRAINT PK_Borrowers PRIMARY KEY (BorrowerID),
