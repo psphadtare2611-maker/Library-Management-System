@@ -1,0 +1,32 @@
+# ============================================================================
+# .gitignore  -  files and folders Git should never track
+# ============================================================================
+
+# --- Python bytecode / caches ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# --- Virtual environments ---
+venv/
+env/
+.venv/
+ENV/
+
+# --- IDE / editor settings ---
+.vscode/
+.idea/
+*.swp
+*~
+
+# --- OS junk ---
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+# --- App-specific ---
+config/secrets.py         # local DB credentials (never commit connection strings)
+reports/exports/*         # generated report files
+!reports/exports/.gitkeep # ...but keep the empty folder in the repo
+*.log                     # runtime log files

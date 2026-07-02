@@ -1,0 +1,18 @@
+-- ============================================================================
+-- database/schema.sql
+-- ----------------------------------------------------------------------------
+-- DATABASE SCHEMA (DDL) for the Library Management System — SQL Server.
+--
+-- Run this ONCE to create the database tables.
+--
+-- Will define (to be implemented later):
+--   Books        - the catalog of books you own (soft-deleted via is_active)
+--   Borrowers    - friends who borrow books
+--   Transactions - the borrowing log; the heart of the system.
+--                  return_date IS NULL  => book is currently out.
+--                  Rows are never deleted -> preserves complete history.
+--
+-- Relationships:
+--   Books (1) --< Transactions >-- (1) Borrowers
+--   Foreign keys enforce that you cannot issue a non-existent book/borrower.
+-- ============================================================================
