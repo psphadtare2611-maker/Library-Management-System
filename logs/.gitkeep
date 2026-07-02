@@ -1,0 +1,2 @@
+# Keeps the logs/ folder in version control.
+# The runtime log file app.log is git-ignored (see .gitignore: *.log).

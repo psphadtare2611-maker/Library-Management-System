@@ -20,6 +20,7 @@
 import pyodbc
 
 from config.settings import get_connection_string
+from utils.logger import logger
 
 
 class Database:
@@ -65,6 +66,7 @@ class Database:
             self.cursor = self.connection.cursor()
         except pyodbc.Error as error:
             # Wrap the low-level driver error in a readable message.
+            logger.error(f"DB error [connect]: {error}")
             raise ConnectionError(
                 f"Failed to connect to SQL Server. "
                 f"Check DB_CONFIG in config/settings.py.\nDetails: {error}"
@@ -115,6 +117,7 @@ class Database:
             self.cursor.execute(query, params)
             return self.cursor.fetchall()
         except pyodbc.Error as error:
+            logger.error(f"DB error [execute_query]: {error} | SQL: {query}")
             raise RuntimeError(f"Query failed: {query}\nDetails: {error}")
 
     def fetch_one(self, query: str, params: tuple = ()):
@@ -126,6 +129,7 @@ class Database:
             self.cursor.execute(query, params)
             return self.cursor.fetchone()
         except pyodbc.Error as error:
+            logger.error(f"DB error [fetch_one]: {error} | SQL: {query}")
             raise RuntimeError(f"Query failed: {query}\nDetails: {error}")
 
     # ------------------------------------------------------------------ #
@@ -147,6 +151,7 @@ class Database:
             # Undo the partial change before re-raising.
             if self.connection is not None:
                 self.connection.rollback()
+            logger.error(f"DB error [execute_non_query]: {error} | SQL: {query}")
             raise RuntimeError(f"Statement failed: {query}\nDetails: {error}")
 
     def execute_insert(self, query: str, params: tuple = ()):
@@ -167,4 +172,5 @@ class Database:
         except pyodbc.Error as error:
             if self.connection is not None:
                 self.connection.rollback()
+            logger.error(f"DB error [execute_insert]: {error} | SQL: {query}")
             raise RuntimeError(f"Insert failed: {query}\nDetails: {error}")

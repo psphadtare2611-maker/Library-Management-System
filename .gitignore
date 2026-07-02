@@ -26,7 +26,16 @@ Desktop.ini
 .DS_Store
 
 # --- App-specific ---
-config/secrets.py         # local DB credentials (never commit connection strings)
-reports/exports/*         # generated report files
-!reports/exports/.gitkeep # ...but keep the empty folder in the repo
-*.log                     # runtime log files
+# (Git does NOT support trailing comments on pattern lines, so keep comments
+#  on their own lines above each pattern.)
+
+# Local DB credentials (never commit connection strings)
+config/secrets.py
+
+# Generated report files, but keep the empty folder in the repo
+reports/exports/*
+!reports/exports/.gitkeep
+
+# Runtime log files, but keep the empty folder in the repo
+logs/*.log
+!logs/.gitkeep

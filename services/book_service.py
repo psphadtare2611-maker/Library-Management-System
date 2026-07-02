@@ -18,6 +18,7 @@
 
 from database.connection import Database
 from models.book import Book
+from utils.logger import logger
 
 
 class BookService:
@@ -73,6 +74,7 @@ class BookService:
             )
             with Database() as db:
                 new_id = db.execute_insert(query, params)
+            logger.info(f"Book added: '{book.title}' (id={new_id})")
             return self._response(True, f"Book '{book.title}' added successfully.", new_id)
         except Exception as error:
             return self._response(False, f"Could not add book: {error}")
@@ -147,6 +149,7 @@ class BookService:
                 db.execute_non_query(
                     "UPDATE Books SET Status = 'Removed' WHERE BookID = ?", (book_id,)
                 )
+            logger.info(f"Book deleted: '{title}' (id={book_id})")
             return self._response(True, f"Book '{title}' removed successfully.")
         except Exception as error:
             return self._response(False, f"Could not remove book: {error}")

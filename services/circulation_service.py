@@ -24,6 +24,7 @@ from datetime import date
 
 from database.connection import Database
 from models.transaction import Transaction
+from utils.logger import logger
 
 
 class CirculationService:
@@ -109,6 +110,11 @@ class CirculationService:
                 # Commit steps 4 and 5 together.
                 db.connection.commit()
 
+            logger.info(
+                f"Book issued: '{title}' to '{borrower_name}' "
+                f"(tx={int(new_id) if new_id is not None else '?'}, "
+                f"due {tx.expected_return_date})"
+            )
             return self._response(
                 True,
                 f"'{title}' issued to '{borrower_name}'. "
@@ -224,6 +230,10 @@ class CirculationService:
             message = f"'{title}' returned by '{name}'."
             if late_days > 0:
                 message += f" It was {late_days} day(s) overdue."
+            logger.info(
+                f"Book returned: '{title}' by '{name}' (tx={transaction_id}"
+                + (f", {late_days} day(s) overdue)" if late_days > 0 else ")")
+            )
             return self._response(True, message, transaction_id)
         except Exception as error:
             return self._response(False, f"Could not return book: {error}")
