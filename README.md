@@ -81,5 +81,10 @@ Library Management System/
 
 ## Status
 
-🚧 Project scaffolding stage — folder structure and file stubs are in place.
-Functionality is implemented in phases (see the development roadmap).
+✅ Complete and runnable. Launch with `python main.py`.
+
+The main window provides a sidebar to every screen:
+Dashboard, Books, Add Book, Borrowers, Issue Book, Return Book, Reports,
+Statistics, and Universal Search. All features run against a live SQL Server
+database, with validation, centralized error handling, transaction rollback,
+and logging to `logs/app.log`.
