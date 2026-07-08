@@ -32,6 +32,7 @@ from ui.circulation_view import IssueBookView, ReturnBookView
 from ui.report_view import ReportView
 from ui.statistics_view import StatisticsView
 from ui.search_view import UniversalSearchView
+from ui.recommendation_view import RecommendationView
 
 
 class MainWindow(tk.Tk):
@@ -52,6 +53,7 @@ class MainWindow(tk.Tk):
         ("📊  Reports", "reports"),
         ("📈  Statistics", "statistics"),
         ("🔍  Search", "search"),
+        ("🤝  Recommend", "recommend"),
     )
 
     def __init__(self):
@@ -171,6 +173,8 @@ class MainWindow(tk.Tk):
             return StatisticsView(parent)
         if key == "search":
             return UniversalSearchView(parent)
+        if key == "recommend":
+            return RecommendationView(parent)
         raise ValueError(f"Unknown screen '{key}'")
 
     def _dashboard_callbacks(self):

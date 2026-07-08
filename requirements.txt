@@ -12,6 +12,9 @@ pandas>=2.0.0          # Builds report tables and writes them to Excel
 openpyxl>=3.1.0        # Excel (.xlsx) engine used by pandas.to_excel
 # reportlab>=4.0.0     # Export reports to PDF -- uncomment if PDF export added
 
+# --- Machine learning (content-based recommendations) ---
+scikit-learn>=1.3.0    # TF-IDF vectorizer + cosine similarity for "You might also like"
+
 # --- Notes ---
 # Tkinter is NOT listed here: it ships with the standard Python installation.
 # Keep this file trimmed to what is actually imported by the code.
