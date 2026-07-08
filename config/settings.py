@@ -68,6 +68,14 @@ def get_connection_string() -> str:
 LOAN_PERIOD_DAYS = 14          # default borrowing window (used to set due date)
 
 # ----------------------------------------------------------------------------
+# AI ASSISTANT (Claude API) SETTINGS
+# ----------------------------------------------------------------------------
+# The API key itself is NOT stored here — it is read from the ANTHROPIC_API_KEY
+# environment variable by the Anthropic SDK, so no secret is committed.
+ASSISTANT_MODEL = "claude-opus-4-8"     # Anthropic model id
+ASSISTANT_MAX_TOKENS = 2048             # max tokens for each assistant reply
+
+# ----------------------------------------------------------------------------
 # APPLICATION METADATA
 # ----------------------------------------------------------------------------
 APP_NAME = "Library Management System"

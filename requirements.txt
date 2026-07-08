@@ -18,6 +18,10 @@ scikit-learn>=1.3.0    # TF-IDF vectorizer + cosine similarity for "You might al
 # --- Semantic search (search by meaning) ---
 sentence-transformers>=2.2.0   # pretrained embedding model (all-MiniLM-L6-v2) for smart search
 
+# --- AI assistant (Claude API) ---
+anthropic>=0.40.0              # Anthropic SDK for the natural-language assistant
+                               # (needs the ANTHROPIC_API_KEY env var at runtime)
+
 # --- Notes ---
 # Tkinter is NOT listed here: it ships with the standard Python installation.
 # Keep this file trimmed to what is actually imported by the code.
