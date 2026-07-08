@@ -197,6 +197,30 @@ class BookService(ServiceBase):
             return self._response(False, "Search failed. Please try again.")
 
     # ------------------------------------------------------------------ #
+    # READ — title-only search (for the autocomplete search bar)
+    # ------------------------------------------------------------------ #
+    def search_books_by_title(self, text):
+        """
+        Search the Title column only (case-insensitive substring), for the
+        Google-style autocomplete. Excludes removed books. Returns a list of
+        Books in `data`, sorted by title. Result ranking is done by the caller.
+        """
+        try:
+            like = f"%{(text or '').strip()}%"
+            query = (
+                f"SELECT {self._COLUMNS} FROM Books "
+                "WHERE Status <> 'Removed' AND Title LIKE ? "
+                "ORDER BY Title"
+            )
+            with Database() as db:
+                rows = db.execute_query(query, (like,))
+            books = [self._row_to_book(r) for r in rows]
+            return self._response(True, f"{len(books)} match(es).", books)
+        except Exception as error:
+            logger.error(f"search_books_by_title failed (text={text!r}): {error}")
+            return self._response(False, "Search failed. Please try again.")
+
+    # ------------------------------------------------------------------ #
     # READ — all books
     # ------------------------------------------------------------------ #
     def get_all_books(self):

@@ -31,7 +31,7 @@ from ui.borrower_view import BorrowerListView
 from ui.circulation_view import IssueBookView, ReturnBookView
 from ui.report_view import ReportView
 from ui.statistics_view import StatisticsView
-from ui.search_view import UniversalSearchView
+from ui.book_search_view import BookSearchView
 from ui.recommendation_view import RecommendationView
 from ui.smart_search_view import SmartSearchView
 from ui.assistant_view import AssistantView
@@ -176,7 +176,7 @@ class MainWindow(tk.Tk):
         if key == "statistics":
             return StatisticsView(parent)
         if key == "search":
-            return UniversalSearchView(parent)
+            return BookSearchView(parent)
         if key == "smart_search":
             return SmartSearchView(parent)
         if key == "recommend":
