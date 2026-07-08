@@ -81,7 +81,8 @@ class ReportView(ttk.Frame):
         self.cmb_report.pack(side="left")
         self.cmb_report.bind("<<ComboboxSelected>>", lambda e: self._generate())
 
-        ttk.Button(toolbar, text="Generate", command=self._generate).pack(side="left", padx=6)
+        ttk.Button(toolbar, text="Generate", command=self._generate,
+                   style="Primary.TButton").pack(side="left", padx=6)
         ttk.Button(toolbar, text="Export to Excel", command=self._export).pack(side="left")
 
         # ---- Treeview (rebuilt per report) --------------------------------

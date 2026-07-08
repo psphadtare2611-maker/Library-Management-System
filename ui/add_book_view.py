@@ -120,7 +120,8 @@ class AddBookView(ttk.Frame):
         # ---- Buttons -------------------------------------------------------
         btns = ttk.Frame(self, padding=(30, 10, 30, 25))
         btns.grid(row=3, column=0, sticky="ew")
-        ttk.Button(btns, text="Save", command=self._on_save).pack(side="left")
+        ttk.Button(btns, text="Save", command=self._on_save,
+                   style="Primary.TButton").pack(side="left")
         ttk.Button(btns, text="Clear", command=self._on_clear).pack(side="left", padx=10)
         ttk.Button(btns, text="Back", command=self._on_back).pack(side="right")
 

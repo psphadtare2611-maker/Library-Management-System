@@ -89,7 +89,8 @@ class BookListView(ttk.Frame):
         ttk.Button(toolbar, text="Search", command=self._on_search).grid(row=0, column=2, padx=4)
         ttk.Button(toolbar, text="Refresh", command=self._on_refresh).grid(row=0, column=3, padx=4)
         ttk.Button(toolbar, text="Update", command=self._on_update).grid(row=0, column=4, padx=4)
-        ttk.Button(toolbar, text="Delete", command=self._on_delete).grid(row=0, column=5, padx=4)
+        ttk.Button(toolbar, text="Delete", command=self._on_delete,
+                   style="Danger.TButton").grid(row=0, column=5, padx=4)
 
         # ---- Treeview + scrollbars ----------------------------------------
         table_wrap = ttk.Frame(self, padding=(15, 0, 15, 10))
@@ -292,7 +293,8 @@ class _EditBookDialog(tk.Toplevel):
 
         btns = ttk.Frame(frm)
         btns.grid(row=6, column=0, columnspan=2, sticky="e", pady=(15, 0))
-        ttk.Button(btns, text="Save", command=self._save).pack(side="left", padx=5)
+        ttk.Button(btns, text="Save", command=self._save,
+                   style="Primary.TButton").pack(side="left", padx=5)
         ttk.Button(btns, text="Cancel", command=self.destroy).pack(side="left")
 
     def _save(self):

@@ -28,13 +28,13 @@ class DashboardView(tk.Frame):
     HEADER_BG = theme.HEADER_BG
     HEADER_FG = theme.HEADER_FG
 
-    # (key, title, accent colour) for each card.
+    # (key, title, accent colour) for each card — modern palette.
     CARDS = (
-        ("total_books", "Total Books", "#3498db"),
-        ("available_books", "Available Books", "#27ae60"),
-        ("borrowed_books", "Borrowed Books", "#e67e22"),
-        ("borrowers", "Borrowers", "#8e44ad"),
-        ("today_transactions", "Today's Transactions", "#16a085"),
+        ("total_books", "Total Books", "#4f46e5"),        # indigo
+        ("available_books", "Available Books", "#16a34a"), # green
+        ("borrowed_books", "Borrowed Books", "#f59e0b"),   # amber
+        ("borrowers", "Borrowers", "#8b5cf6"),             # violet
+        ("today_transactions", "Today's Transactions", "#0891b2"),  # cyan
     )
 
     def __init__(self, parent, report_service=None, callbacks=None):
@@ -92,12 +92,12 @@ class DashboardView(tk.Frame):
         ).grid(row=0, column=0, columnspan=6, pady=(0, 12))
 
         buttons = [
-            ("Books", "books", "#3498db"),
-            ("Borrowers", "borrowers", "#8e44ad"),
-            ("Issue", "issue", "#e67e22"),
-            ("Return", "return", "#16a085"),
-            ("Reports", "reports", "#34495e"),
-            ("Exit", "exit", "#c0392b"),
+            ("Books", "books", "#4f46e5"),
+            ("Borrowers", "borrowers", "#8b5cf6"),
+            ("Issue", "issue", "#f59e0b"),
+            ("Return", "return", "#0891b2"),
+            ("Reports", "reports", "#334155"),
+            ("Exit", "exit", "#dc2626"),
         ]
         for col, (label, name, colour) in enumerate(buttons):
             self._make_nav_button(nav_wrap, col, label, name, colour)

@@ -40,9 +40,10 @@ from ui.assistant_view import AssistantView
 class MainWindow(tk.Tk):
     """Root window: a sidebar of screens plus a swappable content area."""
 
-    SIDEBAR_BG = "#1f2d3d"      # slightly darker than the header bars
-    SIDEBAR_ACTIVE = theme.ACCENT
-    SIDEBAR_FG = "#ecf0f1"
+    SIDEBAR_BG = theme.SIDEBAR_BG
+    SIDEBAR_HOVER = theme.SIDEBAR_HOVER
+    SIDEBAR_ACTIVE = theme.SIDEBAR_ACTIVE
+    SIDEBAR_FG = theme.SIDEBAR_FG
 
     # (label, key) pairs, in the order they appear in the sidebar.
     NAV_ITEMS = (
@@ -63,8 +64,12 @@ class MainWindow(tk.Tk):
     def __init__(self):
         super().__init__()
         self.title(APP_NAME)
-        self.geometry("1150x700")
-        self.minsize(950, 620)
+        self.geometry("1180x720")
+        self.minsize(980, 640)
+        self.configure(bg=theme.BG)
+
+        # Apply the app-wide widget styling ONCE, before building any screen.
+        theme.apply_global_style()
 
         self._content = None        # the currently displayed view
         self._nav_buttons = {}      # key -> sidebar button (for highlighting)
@@ -105,7 +110,7 @@ class MainWindow(tk.Tk):
         ).pack(side="bottom", fill="x")
 
         # ---- Content area --------------------------------------------------
-        self._content_area = tk.Frame(self, bg="#ffffff")
+        self._content_area = tk.Frame(self, bg=theme.BG)
         self._content_area.grid(row=0, column=1, sticky="nsew")
         self._content_area.rowconfigure(0, weight=1)
         self._content_area.columnconfigure(0, weight=1)
@@ -124,7 +129,7 @@ class MainWindow(tk.Tk):
         # Hover only affects inactive buttons (the active one keeps its colour).
         def on_enter(_e, b=btn, k=key):
             if k != self._active_key:
-                b.configure(bg="#2a3b4d")
+                b.configure(bg=self.SIDEBAR_HOVER)
 
         def on_leave(_e, b=btn, k=key):
             if k != self._active_key:

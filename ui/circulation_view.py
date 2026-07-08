@@ -117,7 +117,8 @@ class IssueBookView(ttk.Frame):
         # ---- Buttons -------------------------------------------------------
         btns = ttk.Frame(self, padding=(30, 5, 30, 25))
         btns.grid(row=3, column=0, sticky="ew")
-        ttk.Button(btns, text="Issue", command=self._on_issue).pack(side="left")
+        ttk.Button(btns, text="Issue", command=self._on_issue,
+                   style="Primary.TButton").pack(side="left")
         ttk.Button(btns, text="Clear", command=self._on_clear).pack(side="left", padx=10)
         ttk.Button(btns, text="Refresh Lists", command=self._on_refresh).pack(side="right")
 
@@ -250,7 +251,8 @@ class ReturnBookView(ttk.Frame):
         entry.bind("<Return>", lambda e: self._on_search())
         ttk.Button(toolbar, text="Search", command=self._on_search).grid(row=0, column=2, padx=4)
         ttk.Button(toolbar, text="Refresh", command=self.refresh).grid(row=0, column=3, padx=4)
-        ttk.Button(toolbar, text="Return Selected", command=self._on_return).grid(row=0, column=4, padx=4)
+        ttk.Button(toolbar, text="Return Selected", command=self._on_return,
+                   style="Primary.TButton").grid(row=0, column=4, padx=4)
 
         # Table of active loans.
         wrap = ttk.Frame(self, padding=(15, 0, 15, 10))
