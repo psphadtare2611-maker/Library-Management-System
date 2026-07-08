@@ -33,6 +33,7 @@ from ui.report_view import ReportView
 from ui.statistics_view import StatisticsView
 from ui.search_view import UniversalSearchView
 from ui.recommendation_view import RecommendationView
+from ui.smart_search_view import SmartSearchView
 
 
 class MainWindow(tk.Tk):
@@ -53,6 +54,7 @@ class MainWindow(tk.Tk):
         ("📊  Reports", "reports"),
         ("📈  Statistics", "statistics"),
         ("🔍  Search", "search"),
+        ("🧠  Smart Search", "smart_search"),
         ("🤝  Recommend", "recommend"),
     )
 
@@ -173,6 +175,8 @@ class MainWindow(tk.Tk):
             return StatisticsView(parent)
         if key == "search":
             return UniversalSearchView(parent)
+        if key == "smart_search":
+            return SmartSearchView(parent)
         if key == "recommend":
             return RecommendationView(parent)
         raise ValueError(f"Unknown screen '{key}'")
