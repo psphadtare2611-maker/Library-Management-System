@@ -43,13 +43,17 @@ class IssueBookView(ttk.Frame):
         self.circulation = circulation_service or CirculationService()
 
         # Parallel lists so the selected combobox index maps to a real id.
-        self._available_books = []
+        self._available_books = []        # all books available to issue
+        self._filtered_books = []         # subset currently shown in the dropdown
         self._borrowers = []
 
+        self.var_book_search = tk.StringVar()   # search box above the Book list
         self.var_issue = tk.StringVar()
         self.var_expected = tk.StringVar()
 
         self._build_ui()
+        # Filter the book dropdown live as the user types in the search box.
+        self.var_book_search.trace_add("write", self._filter_books)
         self._load_dropdowns()
         self._set_default_dates()
 
@@ -80,27 +84,36 @@ class IssueBookView(ttk.Frame):
             if required:
                 tk.Label(wrap, text=" *", fg="red").pack(side="left")
 
-        # Book (available only)
-        label(0, "Book", required=True)
+        # Search box to filter the book list by name/author
+        label(0, "Search Book")
+        search_wrap = ttk.Frame(form)
+        search_wrap.grid(row=0, column=1, sticky="ew", pady=10)
+        search_wrap.columnconfigure(0, weight=1)
+        ttk.Entry(search_wrap, textvariable=self.var_book_search,
+                  font=("Segoe UI", 10)).grid(row=0, column=0, sticky="ew")
+        ttk.Label(search_wrap, text="  type to filter", foreground="#888").grid(row=0, column=1)
+
+        # Book (available only) — its list narrows as you type in the search box
+        label(1, "Book", required=True)
         self.cmb_book = ttk.Combobox(form, state="readonly", font=("Segoe UI", 10))
-        self.cmb_book.grid(row=0, column=1, sticky="ew", pady=10)
+        self.cmb_book.grid(row=1, column=1, sticky="ew", pady=10)
 
         # Borrower
-        label(1, "Borrower", required=True)
+        label(2, "Borrower", required=True)
         self.cmb_borrower = ttk.Combobox(form, state="readonly", font=("Segoe UI", 10))
-        self.cmb_borrower.grid(row=1, column=1, sticky="ew", pady=10)
+        self.cmb_borrower.grid(row=2, column=1, sticky="ew", pady=10)
 
         # Issue date
-        label(2, "Issue Date", required=True)
+        label(3, "Issue Date", required=True)
         issue_wrap = ttk.Frame(form)
-        issue_wrap.grid(row=2, column=1, sticky="ew", pady=10)
+        issue_wrap.grid(row=3, column=1, sticky="ew", pady=10)
         ttk.Entry(issue_wrap, textvariable=self.var_issue, width=18).pack(side="left")
         ttk.Label(issue_wrap, text="  (YYYY-MM-DD)", foreground="#888").pack(side="left")
 
         # Expected return date
-        label(3, "Expected Return Date", required=True)
+        label(4, "Expected Return Date", required=True)
         exp_wrap = ttk.Frame(form)
-        exp_wrap.grid(row=3, column=1, sticky="ew", pady=10)
+        exp_wrap.grid(row=4, column=1, sticky="ew", pady=10)
         ttk.Entry(exp_wrap, textvariable=self.var_expected, width=18).pack(side="left")
         ttk.Label(exp_wrap, text=f"  (default: +{LOAN_PERIOD_DAYS} days)",
                   foreground="#888").pack(side="left")
@@ -126,10 +139,9 @@ class IssueBookView(ttk.Frame):
         self._available_books = [
             b for b in (books_result["data"] or []) if b.is_available()
         ] if books_result["success"] else []
-        self.cmb_book["values"] = [
-            f"{b.title} — {b.author or 'Unknown'}" for b in self._available_books
-        ]
-        self.cmb_book.set("")
+        # Reset the search box and (re)populate the book list through the filter.
+        self.var_book_search.set("")
+        self._filter_books()
 
         borrowers_result = self.borrower_service.get_all_borrowers()
         self._borrowers = borrowers_result["data"] or [] if borrowers_result["success"] else []
@@ -145,6 +157,29 @@ class IssueBookView(ttk.Frame):
             self._set_status("No borrowers registered yet.", error=True)
         else:
             self._set_status("")
+
+    def _filter_books(self, *_):
+        """Narrow the Book dropdown to titles/authors matching the search box."""
+        query = self.var_book_search.get().strip().lower()
+        if query:
+            self._filtered_books = [
+                b for b in self._available_books
+                if query in (b.title or "").lower() or query in (b.author or "").lower()
+            ]
+        else:
+            self._filtered_books = list(self._available_books)
+
+        self.cmb_book["values"] = [
+            f"{b.title} — {b.author or 'Unknown'}" for b in self._filtered_books
+        ]
+        # If exactly one book matches, pick it automatically; else clear the choice.
+        if len(self._filtered_books) == 1:
+            self.cmb_book.current(0)
+        else:
+            self.cmb_book.set("")
+
+        if query and not self._filtered_books:
+            self._set_status(f"No available books match '{query}'.", error=True)
 
     def _set_default_dates(self):
         today = date.today()
@@ -165,7 +200,7 @@ class IssueBookView(ttk.Frame):
             self._set_status("Please select a borrower.", error=True)
             return
 
-        book = self._available_books[book_index]
+        book = self._filtered_books[book_index]
         borrower = self._borrowers[borrower_index]
 
         result = self.circulation.issue_book(
@@ -186,6 +221,7 @@ class IssueBookView(ttk.Frame):
             messagebox.showerror("Error", result["message"])
 
     def _on_clear(self):
+        self.var_book_search.set("")   # also resets the book list to show all
         self.cmb_book.set("")
         self.cmb_borrower.set("")
         self._set_default_dates()
