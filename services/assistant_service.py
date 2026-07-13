@@ -8,7 +8,7 @@
 #   1. The user asks a plain-English question ("who has my Harry Potter books?").
 #   2. We send the question to Claude along with a set of TOOLS — small typed
 #      functions that wrap this app's existing services (search, reports,
-#      statistics, recommendations).
+#      statistics).
 #   3. Claude decides which tool(s) to call; we execute them against the live
 #      database and hand the results back.
 #   4. Claude reads the results and replies in natural language.
@@ -33,7 +33,6 @@ from services.search_service import SearchService
 from services.book_service import BookService
 from services.report_service import ReportService
 from services.statistics_service import StatisticsService
-from services.recommendation_service import RecommendationService
 from utils.logger import logger
 
 
@@ -90,24 +89,14 @@ class AssistantService(ServiceBase):
             ),
             "input_schema": {"type": "object", "properties": {}},
         },
-        {
-            "name": "recommend_books",
-            "description": "Recommend books similar to a given book title (content-based).",
-            "input_schema": {
-                "type": "object",
-                "properties": {"title": {"type": "string", "description": "A book title to base suggestions on."}},
-                "required": ["title"],
-            },
-        },
     ]
 
     def __init__(self, book_service=None, search_service=None, report_service=None,
-                 statistics_service=None, recommendation_service=None):
+                 statistics_service=None):
         self.book_service = book_service or BookService()
         self.search_service = search_service or SearchService()
         self.report_service = report_service or ReportService()
         self.statistics_service = statistics_service or StatisticsService()
-        self.recommendation_service = recommendation_service or RecommendationService(self.book_service)
 
     # ------------------------------------------------------------------ #
     # Availability check (used by the UI to show a helpful hint)
@@ -221,9 +210,6 @@ class AssistantService(ServiceBase):
             if name == "get_statistics":
                 return self._format_stats(self.statistics_service.get_statistics())
 
-            if name == "recommend_books":
-                return self._recommend(tool_input.get("title", ""))
-
             return f"Error: unknown tool '{name}'."
         except Exception as error:
             logger.error(f"tool '{name}' failed: {error}")
@@ -265,21 +251,3 @@ class AssistantService(ServiceBase):
             per = ", ".join(f"{p['name']}: {p['count']}" for p in d["per_person"])
             parts.append(f"Books borrowed per person — {per}")
         return "\n".join(parts)
-
-    def _recommend(self, title):
-        if not title.strip():
-            return "Please provide a book title."
-        found = self.book_service.search_book(title)
-        if not found["success"] or not found["data"]:
-            return f"No book found matching '{title}'."
-        book = found["data"][0]
-        result = self.recommendation_service.recommend(book.book_id, top_n=5)
-        if not result["success"]:
-            return f"Error: {result['message']}"
-        if not result["data"]:
-            return f"No similar books found for '{book.title}'."
-        lines = [f"Similar to '{book.title}':"]
-        for item in result["data"]:
-            b = item["book"]
-            lines.append(f"  {item['score']:.0f}% — {b.title} ({b.author or 'Unknown'}, {b.category or '-'})")
-        return "\n".join(lines)
